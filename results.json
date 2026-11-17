@@ -1,0 +1,47 @@
+{
+  "model": "distilbert/distilbert-base-multilingual-cased",
+  "dataset": "UD_Chinese-GSDSimp",
+  "seed": 42,
+  "max_train_sentences": 600,
+  "max_dev_sentences": 150,
+  "actual_train_sentences": 600,
+  "actual_dev_sentences": 150,
+  "epochs": 3,
+  "batch_size": 16,
+  "learning_rate": 0.00002,
+  "frozen_components": [
+    "embeddings",
+    "transformer layers 0-2"
+  ],
+  "device": "cuda (Tesla T4)",
+  "results": [
+    {
+      "condition": "full_finetuning",
+      "dev_word_accuracy": 0.8754666666666666,
+      "correct_words": 3283,
+      "dev_words": 3750,
+      "epoch_mean_training_loss": [
+        1.9213980122616416,
+        0.7462470507935474,
+        0.41112282166355535
+      ],
+      "trainable_parameters": 134747153,
+      "total_parameters": 134747153,
+      "elapsed_seconds": 16.6
+    },
+    {
+      "condition": "partial_freezing",
+      "dev_word_accuracy": 0.8557333333333333,
+      "correct_words": 3209,
+      "dev_words": 3750,
+      "epoch_mean_training_loss": [
+        2.168258259170934,
+        1.066286585832897,
+        0.5588157357353913
+      ],
+      "trainable_parameters": 21276689,
+      "total_parameters": 134747153,
+      "elapsed_seconds": 8.2
+    }
+  ]
+}
