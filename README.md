@@ -1,49 +1,37 @@
 # CSC394 Challenge 1: Partial Freezing for Multilingual PoS Tagging
 
-This repository contains a small, reproducible comparison of full fine-tuning and partial freezing for Universal Dependencies Chinese GSD PoS tagging.
+A reproducible comparison of full fine-tuning and partial freezing for Universal Dependencies Chinese GSD UPOS tagging.
 
-## Research question
+## Experiment
 
-Does freezing the embeddings and the lower half of a multilingual DistilBERT encoder change UPOS accuracy on a fixed Chinese GSD development split, compared with fine-tuning every parameter?
+- Data: official UD Chinese GSD Simplified train/dev files; fixed-seed samples of 600 and 150 sentences.
+- Model: distilbert/distilbert-base-multilingual-cased.
+- Metric: word-level UPOS accuracy, counting the first subword only.
+- Baseline: train every parameter. Frozen condition: freeze embeddings and DistilBERT layers 0–2; train layers 3–5 and the classification head.
+- Shared setup: seed 42, AdamW, learning rate 2e-5, batch size 16, three epochs, fresh pretrained checkpoint per condition.
 
-## Method
+## Measured results
 
-- Dataset: official UD Chinese-GSD Simplified train and dev CoNLL-U files.
-- Model: `distilbert/distilbert-base-multilingual-cased`.
-- Task: predict one UPOS label per UD word. Only the first subword for each word contributes to the loss and accuracy.
-- Comparison: both runs start from a fresh copy of the same pretrained checkpoint and use the same sampled train/dev examples, seed, batch size, learning rate, and number of epochs.
-- Partial-freezing choice: freeze embeddings and encoder layers 0–2 (three of DistilBERT's six layers); train layers 3–5 and the classification head. This keeps lower-level multilingual representations fixed while allowing upper contextual layers to adapt.
-- Metric: word-level UPOS accuracy on the official development split. The development data is not used for gradient updates.
+The reference run used a Tesla T4. Full fine-tuning reached **87.55%** (3,283/3,750 words); partial freezing reached **85.57%** (3,209/3,750 words), a 1.97 percentage-point gap on this sample. The frozen setup trained 21.3M of 134.7M parameters. This is one seed and one language, so it is a preliminary comparison rather than a general conclusion.
 
-The notebook runs both experiments and saves the measured scores to `results.json`. It does not include fabricated or pre-filled accuracy values.
+See [report.md](report.md) for interpretation and limitations, and [results.json](results.json) for exact metrics and loss values.
 
 ## Run
 
-Python 3.10–3.12 is recommended. From this folder:
+Open [the notebook in Colab](https://colab.research.google.com/github/billchenziang33/csc394-pos-partial-freezing/blob/main/partial_freezing_pos_tagging.ipynb) and run each cell in order. The notebook installs Transformers, checks out the script, downloads the public model and UD data, and saves results to results.json.
 
-```bash
+To run locally with Python 3.10–3.12:
+
+~~~bash
 python -m pip install -r requirements.txt
-jupyter notebook partial_freezing_pos_tagging.ipynb
-```
+python run_experiment.py --max-train 600 --max-dev 150 --epochs 3 --batch-size 16 --learning-rate 2e-5 --seed 42
+~~~
 
-Run all notebook cells from top to bottom. The first run downloads the dataset and model weights. A CUDA GPU is recommended; CPU execution is supported but may take substantially longer.
+A CUDA GPU is recommended; CPU execution works but may take longer.
 
-The notebook is the main, step-by-step entry point. `run_experiment.py` contains the implementation and can also be run directly:
+## Sources
 
-```bash
-python run_experiment.py --max-train 600 --max-dev 150 --epochs 3 --seed 42
-```
-
-## Results
-
-No accuracy claims are made until the notebook or script has completed successfully. Add the two values from `results.json` to the report and explain the observed difference after the run.
-
-## Limitations
-
-This is a small, single-seed experiment on one language and one UD treebank. It is useful as a controlled challenge experiment, not as evidence that partial freezing is generally better. A stronger follow-up would repeat several seeds, report variance, and evaluate additional languages.
-
-## References
-
-- Nivre, J. et al. (2020). *Universal Dependencies v2: An Evergrowing Multilingual Treebank Collection.* LREC.
-- Sanh, V. et al. (2019). *DistilBERT, a distilled version of BERT: smaller, faster, cheaper and lighter.* NeurIPS EMC² Workshop.
-- Hugging Face Transformers documentation: https://huggingface.co/docs/transformers/tasks/token_classification
+- [Universal Dependencies — Chinese GSD Simplified](https://github.com/UniversalDependencies/UD_Chinese-GSDSimp)
+- [DistilBERT multilingual cased](https://huggingface.co/distilbert/distilbert-base-multilingual-cased)
+- [Hugging Face token-classification guide](https://huggingface.co/docs/transformers/tasks/token_classification)
+- Sanh et al. (2019), [DistilBERT paper](https://arxiv.org/abs/1910.01108)
