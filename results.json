@@ -1,11 +1,13 @@
 {
   "model": "distilbert/distilbert-base-multilingual-cased",
   "dataset": "UD_Chinese-GSDSimp",
-  "seed": 42,
+  "seeds": [
+    42,
+    43,
+    44
+  ],
   "max_train_sentences": 600,
   "max_dev_sentences": 150,
-  "actual_train_sentences": 600,
-  "actual_dev_sentences": 150,
   "epochs": 3,
   "batch_size": 16,
   "learning_rate": 0.00002,
@@ -13,35 +15,163 @@
     "embeddings",
     "transformer layers 0-2"
   ],
-  "device": "cuda (Tesla T4)",
-  "results": [
+  "device": "cuda",
+  "runs": [
     {
-      "condition": "full_finetuning",
-      "dev_word_accuracy": 0.8754666666666666,
-      "correct_words": 3283,
-      "dev_words": 3750,
-      "epoch_mean_training_loss": [
-        1.9213980122616416,
-        0.7462470507935474,
-        0.41112282166355535
+      "model": "distilbert/distilbert-base-multilingual-cased",
+      "dataset": "UD_Chinese-GSDSimp",
+      "seed": 42,
+      "max_train_sentences": 600,
+      "max_dev_sentences": 150,
+      "actual_train_sentences": 600,
+      "actual_dev_sentences": 150,
+      "epochs": 3,
+      "batch_size": 16,
+      "learning_rate": 0.00002,
+      "frozen_components": [
+        "embeddings",
+        "transformer layers 0-2"
       ],
-      "trainable_parameters": 134747153,
-      "total_parameters": 134747153,
-      "elapsed_seconds": 16.6
+      "device": "cuda",
+      "results": [
+        {
+          "condition": "full_finetuning",
+          "dev_word_accuracy": 0.8754666666666666,
+          "correct_words": 3283,
+          "dev_words": 3750,
+          "epoch_mean_training_loss": [
+            1.9213980122616416,
+            0.7462470484407324,
+            0.41112282323209864
+          ],
+          "trainable_parameters": 134747153,
+          "total_parameters": 134747153,
+          "elapsed_seconds": 17.8
+        },
+        {
+          "condition": "partial_freezing",
+          "dev_word_accuracy": 0.8557333333333333,
+          "correct_words": 3209,
+          "dev_words": 3750,
+          "epoch_mean_training_loss": [
+            2.168258259170934,
+            1.0662865889699835,
+            0.5588157325983047
+          ],
+          "trainable_parameters": 21276689,
+          "total_parameters": 134747153,
+          "elapsed_seconds": 8.6
+        }
+      ]
     },
     {
-      "condition": "partial_freezing",
-      "dev_word_accuracy": 0.8557333333333333,
-      "correct_words": 3209,
-      "dev_words": 3750,
-      "epoch_mean_training_loss": [
-        2.168258259170934,
-        1.066286585832897,
-        0.5588157357353913
+      "model": "distilbert/distilbert-base-multilingual-cased",
+      "dataset": "UD_Chinese-GSDSimp",
+      "seed": 43,
+      "max_train_sentences": 600,
+      "max_dev_sentences": 150,
+      "actual_train_sentences": 600,
+      "actual_dev_sentences": 150,
+      "epochs": 3,
+      "batch_size": 16,
+      "learning_rate": 0.00002,
+      "frozen_components": [
+        "embeddings",
+        "transformer layers 0-2"
       ],
-      "trainable_parameters": 21276689,
-      "total_parameters": 134747153,
-      "elapsed_seconds": 8.2
+      "device": "cuda",
+      "results": [
+        {
+          "condition": "full_finetuning",
+          "dev_word_accuracy": 0.8954676447471837,
+          "correct_words": 3418,
+          "dev_words": 3817,
+          "epoch_mean_training_loss": [
+            1.9072497769405967,
+            0.7822266472013373,
+            0.42287598785601166
+          ],
+          "trainable_parameters": 134747153,
+          "total_parameters": 134747153,
+          "elapsed_seconds": 17.3
+        },
+        {
+          "condition": "partial_freezing",
+          "dev_word_accuracy": 0.8763426774954153,
+          "correct_words": 3345,
+          "dev_words": 3817,
+          "epoch_mean_training_loss": [
+            2.1317851951247766,
+            1.0850412845611572,
+            0.5780806400273976
+          ],
+          "trainable_parameters": 21276689,
+          "total_parameters": 134747153,
+          "elapsed_seconds": 9.4
+        }
+      ]
+    },
+    {
+      "model": "distilbert/distilbert-base-multilingual-cased",
+      "dataset": "UD_Chinese-GSDSimp",
+      "seed": 44,
+      "max_train_sentences": 600,
+      "max_dev_sentences": 150,
+      "actual_train_sentences": 600,
+      "actual_dev_sentences": 150,
+      "epochs": 3,
+      "batch_size": 16,
+      "learning_rate": 0.00002,
+      "frozen_components": [
+        "embeddings",
+        "transformer layers 0-2"
+      ],
+      "device": "cuda",
+      "results": [
+        {
+          "condition": "full_finetuning",
+          "dev_word_accuracy": 0.8817645550141062,
+          "correct_words": 3438,
+          "dev_words": 3899,
+          "epoch_mean_training_loss": [
+            1.9161530638995923,
+            0.7458564019516895,
+            0.40823959990551595
+          ],
+          "trainable_parameters": 134747153,
+          "total_parameters": 134747153,
+          "elapsed_seconds": 18.1
+        },
+        {
+          "condition": "partial_freezing",
+          "dev_word_accuracy": 0.8645806617081303,
+          "correct_words": 3371,
+          "dev_words": 3899,
+          "epoch_mean_training_loss": [
+            2.142397824086641,
+            1.0497869629608958,
+            0.5562842535345178
+          ],
+          "trainable_parameters": 21276689,
+          "total_parameters": 134747153,
+          "elapsed_seconds": 10.3
+        }
+      ]
     }
-  ]
+  ],
+  "summary": {
+    "full_finetuning": {
+      "mean_dev_word_accuracy": 0.8842329554759855,
+      "sample_stdev_dev_word_accuracy": 0.010226413431623286,
+      "mean_elapsed_seconds": 17.733333333333334,
+      "trainable_parameters": 134747153
+    },
+    "partial_freezing": {
+      "mean_dev_word_accuracy": 0.8655522241789596,
+      "sample_stdev_dev_word_accuracy": 0.010338965950414392,
+      "mean_elapsed_seconds": 9.433333333333334,
+      "trainable_parameters": 21276689
+    }
+  },
+  "summary_note": "Mean and sample standard deviation describe these paired seeds and seed-specific data samples; they do not establish generalization to other languages or datasets."
 }
