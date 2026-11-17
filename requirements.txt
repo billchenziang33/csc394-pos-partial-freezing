@@ -1,0 +1,4 @@
+torch>=2.2
+transformers>=4.45,<5
+requests>=2.31
+jupyter>=1.0
