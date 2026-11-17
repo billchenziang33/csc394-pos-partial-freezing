@@ -2,45 +2,56 @@
 
 ## Research question
 
-How does freezing lower layers of a multilingual language model affect its UPOS tagging accuracy on a small Chinese treebank sample, compared with fine-tuning the full model?
+How does freezing lower layers of a multilingual model affect word-level UPOS accuracy on Chinese, compared with full fine-tuning?
 
 ## Data and setup
 
-I used the official Universal Dependencies Chinese GSD Simplified treebank. I sampled 600 training sentences and 150 development sentences with a fixed seed. The development sample contains 3,750 word-level UPOS labels. I used `distilbert/distilbert-base-multilingual-cased` with a token-classification head. For Chinese words split into multiple subwords, the loss and accuracy use only the first subword; special tokens and continuation subwords are ignored.
+I used the official Universal Dependencies Chinese GSD Simplified train and development splits. For each of three seeds (42, 43, 44), I sampled 600 training sentences and 150 development sentences. Each seed therefore has a different fixed sample. The resulting development sets contain 3,750, 3,817, and 3,899 word-level UPOS labels.
 
-Both conditions started from a fresh copy of the same pretrained checkpoint and used the same sampled data, seed (42), optimizer (AdamW), learning rate (`2e-5`), batch size (16), and three epochs. The baseline fine-tuned all parameters. The partial-freezing condition kept the embeddings and the first three of DistilBERT's six transformer layers fixed, while training the upper three layers and classification head.
+The model is distilbert/distilbert-base-multilingual-cased with a token-classification head. For words split into multiple subwords, loss and accuracy use only the first subword; special tokens and continuation subwords are ignored.
+
+Each seed is a paired comparison: both conditions use the same sampled sentences, a fresh copy of the same pretrained checkpoint, matching classifier-head initialization, and the same training shuffle order. The baseline updates every parameter. The partial-freezing condition keeps the embeddings and the first three of DistilBERT's six layers fixed, and trains the upper three layers and classification head. Both use AdamW, learning rate 2e-5, batch size 16, and three epochs.
 
 ## Results
 
-| Condition | Development word accuracy | Correct / total words | Trainable parameters | Mean training loss by epoch |
-| --- | ---: | ---: | ---: | --- |
-| Full fine-tuning | 87.55% | 3,283 / 3,750 | 134,747,153 / 134,747,153 | 1.9214, 0.7462, 0.4111 |
-| Freeze embeddings + layers 0–2 | 85.57% | 3,209 / 3,750 | 21,276,689 / 134,747,153 | 2.1683, 1.0663, 0.5588 |
+The table reports the mean and sample standard deviation of accuracy across the three seeds. The mean training time is an average of the recorded runs on a Tesla T4.
 
-In this run, partial freezing scored 1.97 percentage points below full fine-tuning (74 fewer correct development words). It trained about 15.8% of the model's parameters. The script recorded 16.6 seconds for the full-fine-tuning condition and 8.2 seconds for partial freezing on a Tesla T4; these timings describe this small run only.
+| Condition | Mean word accuracy | Sample SD | Mean training time | Trainable parameters |
+| --- | ---: | ---: | ---: | ---: |
+| Full fine-tuning | 88.42% | 1.02 percentage points | 17.7 s | 134,747,153 / 134,747,153 |
+| Freeze embeddings + layers 0–2 | 86.56% | 1.03 percentage points | 9.4 s | 21,276,689 / 134,747,153 |
+
+| Seed | Development words | Full fine-tuning | Partial freezing | Partial minus full |
+| ---: | ---: | ---: | ---: | ---: |
+| 42 | 3,750 | 87.55% | 85.57% | −1.97 pp |
+| 43 | 3,817 | 89.55% | 87.63% | −1.91 pp |
+| 44 | 3,899 | 88.18% | 86.46% | −1.72 pp |
+
+Full fine-tuning scored higher in all three paired runs. The average paired gap was −1.87 percentage points. The partially frozen model trained about 15.8% of the parameters and took about 47% less time in these short runs. These timings only describe this Colab T4 setup and should not be generalized to larger workloads or other hardware.
 
 ## Interpretation
 
-Full fine-tuning performed better on this sample. One possible explanation is that updating all layers let the model adapt its lower-level representations to the Chinese treebank, while freezing those layers limited that adaptation. The smaller trainable parameter count also makes the frozen setup cheaper to optimize. This experiment alone cannot tell whether the accuracy gap is stable or caused partly by the sample and seed.
+On these samples, updating all layers gave better accuracy. One possible explanation is that the lower layers also benefited from adapting to the Chinese treebank. Partial freezing reduced the number of trainable parameters and run time, but did not preserve the full-fine-tuning accuracy in these runs. Three seeds make the comparison less dependent on one random sample, but the evidence is still limited.
 
 ## Limitations and next steps
 
-This is a single-language, single-seed experiment using a subset of the official train and development splits. It does not establish that full fine-tuning is generally better or that partial freezing is ineffective. I would next repeat both conditions with several seeds, report mean and standard deviation, and test another language to see whether the result changes with dataset size and language structure.
+This is one language, one model, one small subset size, and three seeds. Each seed changes both the sentence sample and the model's random initialization, so the reported standard deviation reflects both sources of variation. The results do not establish that full fine-tuning is generally better, or that freezing is ineffective. A useful next step would be to hold the data split fixed while varying only model seeds, then repeat the comparison on another language and a larger sample.
 
 ## Reproduction
 
-Run `partial_freezing_pos_tagging.ipynb` from top to bottom, or install `requirements.txt` and run:
+Install requirements and run the three paired seeds:
 
-```bash
-python run_experiment.py --max-train 600 --max-dev 150 --epochs 3 --batch-size 16 --learning-rate 2e-5 --seed 42
-```
+~~~bash
+python -m pip install -r requirements.txt
+python run_repeated_experiments.py --seeds 42 43 44
+~~~
 
-The run writes the measured configuration and scores to `results.json`.
+The wrapper saves raw per-seed metrics and the mean/sample standard deviation to results.json. The single-seed experiment can also be run with python run_experiment.py --seed 42. The Colab notebook contains the executed run and a short results summary.
 
 ## Sources
 
 - Challenge prompt: [Partial Freezing of MLMs for PoS Tagging](https://docs.google.com/document/d/1F0yPVs7YxExzqPiCESockILN-6e5NWRxtUNda0WuOqc)
 - Data: [Universal Dependencies — Chinese GSD Simplified](https://github.com/UniversalDependencies/UD_Chinese-GSDSimp)
 - Model: [DistilBERT multilingual cased](https://huggingface.co/distilbert/distilbert-base-multilingual-cased)
-- Token classification guide: [Hugging Face Transformers](https://huggingface.co/docs/transformers/tasks/token_classification)
-- Sanh et al. (2019), [DistilBERT](https://arxiv.org/abs/1910.01108)
+- Token alignment: [Hugging Face token classification guide](https://huggingface.co/docs/transformers/tasks/token_classification)
+- Model background: Sanh et al. (2019), [DistilBERT](https://arxiv.org/abs/1910.01108)
